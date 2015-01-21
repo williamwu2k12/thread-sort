@@ -7,40 +7,42 @@
 
 // gcc-4.9 -fopenmp -O2 -g -std=gnu99 -c -o thread_sort.o thread_sort.c; gcc-4.9 -fopenmp -O2 -g -std=gnu99 thread_sort.c -o thread_sort; ./thread_sort
 
-void thread_sort(int SIZE, int RANGE)
+int * thread_sort(int * data, int size, int range, int accuracy)
 {
-    int * data = malloc(sizeof(int) * SIZE);
-    for(int i = 0; i < SIZE; i++)
-    {
-        data[i] = rand() % RANGE + 1;
-    }
-
-    int * array = malloc(sizeof(int) * SIZE);
+    int * array = malloc(sizeof(int) * size);
     
     int i = 0;
     omp_set_dynamic(0);
-    omp_set_num_threads(SIZE);
+    omp_set_num_threads(size);
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
-        usleep(1000 * data[thread_id]);
+        usleep(accuracy * data[thread_id]);
         #pragma omp critical
         {
             array[i] = data[thread_id];
             i++;
         }
     }
-    for (int i = 0; i < SIZE; i++)
+    for (int i = 0; i < size; i++)
     {
         printf("%d ", array[i]);
     }
+    return array;
 }
 
 int main()
 {
-    int SIZE = 100;
-    int RANGE = 1000;
+    int size = 100;
+    int range = 1000;
+    int accuracy = 1000;
 
-    thread_sort(SIZE, RANGE);
+    int * data = malloc(sizeof(int) * size);
+    for(int i = 0; i < size; i++)
+    {
+        data[i] = rand() % range + 1;
+    }
+
+    thread_sort(data, size, range, accuracy);
     return 0;
 }
